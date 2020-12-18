@@ -241,25 +241,20 @@ function process_hash(txn)
   return data;
 }
 
-function clear()
-{
-  context.fillStyle = '#000000';
-  context.fillRect(0, 0, 1024, 1024);
-}
-
 function init(txn)
 { 
   noise = new Noise().noiseDetail(10);
   noise.noiseSeed(3);
 
   line_color = 0xfffad7;
-  canvas = document.getElementById("singularity_canvas");
+  canvas = document.querySelector("canvas");
   canvas.width = 1024;
   canvas.height =1024;
 
   context = canvas.getContext("2d");
 
-  clear();
+  context.fillStyle = '#000000';
+  context.fillRect(0, 0, 1024, 1024);
   
   let hashdata    = process_hash(txn);
   let formdata    = process_formdata(hashdata);
@@ -512,3 +507,5 @@ Noise.prototype = {
     return r;
   }
 }
+
+init(tokenData.hash);
