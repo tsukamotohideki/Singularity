@@ -211,7 +211,7 @@ function generate_renderdata(fd)
   {
     'mass':         lerp(128.0,  900.0,  fd.mass),
     'aperture':     lerp(24.00,  196.0,  fd.aperture),
-    'force':        lerp(256.0,  800.0,  fd.force),
+    'force':        lerp(256.0,  700.0,  fd.force),
     'symmetry':     1.0-fd.symmetry,
     'turbulence':   lerp(0.000,  1.600,  fd.turbulence),
     'chaos':        lerp(0.001,  0.01,   fd.chaos), 
@@ -298,14 +298,14 @@ function render(rd)
         end   = 0x20fbbc;
       break;       
       case 2:
-        start = 0x12d6df;
-        mid   = 0xb9ffad;
-        end   = 0xf70fff;
+        start = 0xfffcc8;
+        mid   = 0xfacc22;
+        end   = 0xf83600;
       break;
       default:
-        start = 0xFFCC00;
-        mid   = 0xFF9900;
-        end   = 0xFF0000;
+        start = 0x73d055;
+        mid   = 0x1f968B;
+        end   = 0x440154;
       break;
     }
 
