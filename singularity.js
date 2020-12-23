@@ -9,9 +9,11 @@ let data = [];
 let buffer_size = 1024;
 let line_color = 0;
 
-let canvas;
+let canvas; 
+let osb;    
 let context;
 let noise;
+let features;
 
 function remap(n, start1, stop1, start2, stop2) 
 {
@@ -93,7 +95,6 @@ function evaluate(n, metadata)
   return metadata ? meta : points;
 }
 
-
 /* 
   Returns ArtBlocks Style Metadata
   ["Mass: 14.9% [LOW]", "Force: 55.7% [AVERAGE]", ...
@@ -118,6 +119,7 @@ function generate_artblocks_metadata(formdata)
 
   return [massstr, forcestr, symstr, turbstr, chaosstr, prostr];
 }
+
 
 const lerp_colour = function(a, b, amount) 
 {
@@ -144,12 +146,12 @@ function three_point_gradient(x, start, mid, end)
 
 function sq(number)
 {
-  return Math.pow(number, 2)
+  return Math.pow(number, 2);
 }
 
 function lerp (start, end, amt)
 {
-  return (1-amt)*start+amt*end
+  return (1-amt)*start+amt*end;
 }
 
 function process_formdata(hashdata) 
@@ -247,13 +249,24 @@ function init(txn)
   
   let dim = Math.min(window.innerWidth, window.innerHeight)
  
-  canvas = document.querySelector("canvas");
-  canvas.width = dim;
-  canvas.height =dim;
+  canvas      = document.querySelector("canvas");
+  osb         = document.createElement('canvas');
 
-  context = canvas.getContext("2d");
-  context.fillStyle = '#000000';
-  context.fillRect(0, 0, dim, dim);
+  osb_context = osb.getContext("2d");
+  can_context = canvas.getContext("2d");
+
+  osb_context.imageSmoothingEnabled = true;
+  can_context.imageSmoothingEnabled = true;  
+  osb_context.imageSmoothingQuality = "high";
+  can_context.imageSmoothingQuality = "high";
+
+  canvas.width  = dim;
+  canvas.height = dim;
+  osb.width     = buffer_size;
+  osb.height    = buffer_size;
+
+  osb_context.fillStyle = '#000000';
+  osb_context.fillRect(0, 0, buffer_size, buffer_size);
   
   line_color = 0xfffad7;
 
@@ -273,11 +286,11 @@ function render(rd)
 {
   for (let i = 0; i < rd.mass; i++) 
   {
+    let increment = (canvas.width / buffer_size) * 0.01;
     let norm_inc = sq(i / rd.mass);
-    let ring_rad = rd.aperture + (i * 0.01);
+    let ring_rad = rd.aperture + (i * increment);
     let current_force = rd.force * norm_inc;
-    let alfa = 255.0 - (norm_inc * 255.0);
-    let alpha = parseInt(alfa);
+    let alpha = parseInt((255.0 - (norm_inc * 255.0)));
     let norm_turb = rd.turbulence * norm_inc;
 
     let g, start, middle, end, sat;
@@ -329,12 +342,13 @@ function render(rd)
     }
 
     let col = lerp_colour(line_color, g, sat);
+    let radial_steps = 500;
 
-    let ang = (Math.PI * 2.0) / 500.0;
+    let ang = (Math.PI * 2.0) / radial_steps;
 
-    context.beginPath();
+    osb_context.beginPath();
 
-    for (let j = 0; j <= 500; j++) 
+    for (let j = 0; j <= radial_steps; j++) 
     {
       let theta = ang * j;
       let ct = Math.cos(theta);
@@ -344,23 +358,17 @@ function render(rd)
       let ken = get_noise(norm_turb * sample_x, norm_turb * sample_y, (i * rd.chaos));
 
       let current_aperture = ring_rad + ken * current_force;
-      let x = (canvas.width/2) + current_aperture * ct;
-      let y = (canvas.width/2) + current_aperture * st;
+      let x = (osb.width/2) + current_aperture * ct;
+      let y = (osb.width/2) + current_aperture * st;
 
-      context.lineTo(x, y);
-
-    /*
-      Individial lines. Not a single stroke with vertices.
-      Gives a grided, mesh like appearence as alpha builds.
-    */
-    
+      osb_context.lineTo(x, y);
     }
 
-    context.strokeStyle = '#' + col.toString(16) + alpha.toString(16);
-    context.stroke();
+    osb_context.strokeStyle = '#' + col.toString(16) + alpha.toString(16);
+    osb_context.stroke();
   }
 
-  context.translate(0.5, 0.5);
+    can_context.drawImage(osb, 0, 0, osb.width, osb.height, 0, 0, canvas.width, canvas.height);
 }
 
 function get_noise(x, y, z)
@@ -510,4 +518,4 @@ Noise.prototype = {
   }
 }
 
-let feature_array = init(tokenData.hash);
+features = init(tokenData.hash);
