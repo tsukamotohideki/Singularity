@@ -94,7 +94,12 @@ function evaluate(n, metadata)
 }
 
 
-function generate_metadata(formdata) 
+/* 
+  Returns ArtBlocks Style Metadata
+  ["Mass: 14.9% [LOW]", "Force: 55.7% [AVERAGE]", ...
+*/
+
+function generate_artblocks_metadata(formdata) 
 {
   let meta_mass = evaluate(formdata.mass, true);
   let meta_force = evaluate(formdata.force, true);
@@ -102,22 +107,16 @@ function generate_metadata(formdata)
   let meta_turbulence = evaluate(formdata.turbulence, true);
   let meta_chaos = evaluate(formdata.chaos, true);
 
-  let form_metadata =
-  {
-    "mass":             formdata.mass,
-    "mass_level":       meta_mass.desciption,
-    "force":            formdata.force,
-    "force_level":      meta_force.desciption,
-    "symmetry":         formdata.symmetry,
-    "symmetry_level":   meta_symmetry.desciption,
-    "turbulence":       formdata.turbulence,
-    "turbulence_level": meta_turbulence.desciption,
-    "chaos":            formdata.chaos,
-    "chaos_level":      meta_chaos.desciption,
-    "prob":             meta_mass.prob * meta_force.prob * meta_symmetry.prob * meta_turbulence.prob * meta_chaos.prob   
-  };
+  let prob = meta_mass.prob * meta_force.prob * meta_symmetry.prob * meta_turbulence.prob * meta_chaos.prob;
 
-  return form_metadata;
+  let massstr = ("Mass: " + (formdata.mass * 100).toFixed(1) + "%") + " [" + meta_mass.desciption.toUpperCase() + "]";
+  let forcestr = ("Force: " + (formdata.force * 100).toFixed(1) + "%") + " [" + meta_force.desciption.toUpperCase() + "]";
+  let symstr = ("Symmetry: " + (formdata.symmetry * 100).toFixed(1) + "%") + " [" + meta_symmetry.desciption.toUpperCase() + "]";
+  let turbstr = ("Turbulence: " + (formdata.turbulence * 100).toFixed(1) + "%") + " [" + meta_turbulence.desciption.toUpperCase() + "]";
+  let chaosstr = ("Chaos: " + (formdata.chaos * 100).toFixed(1) + "%") +  " [" + meta_chaos.desciption.toUpperCase() + "]";
+  let prostr = "Chance: 1 in " + Math.trunc((1.0/(prob)));
+
+  return [massstr, forcestr, symstr, turbstr, chaosstr, prostr];
 }
 
 const lerp_colour = function(a, b, amount) 
@@ -245,17 +244,19 @@ function init(txn)
 { 
   noise = new Noise().noiseDetail(10);
   noise.noiseSeed(3);
-
-  line_color = 0xfffad7;
+  
+  let dim = Math.min(window.innerWidth, window.innerHeight)
+ 
   canvas = document.querySelector("canvas");
-  canvas.width = 1024;
-  canvas.height =1024;
+  canvas.width = dim;
+  canvas.height =dim;
 
   context = canvas.getContext("2d");
-
   context.fillStyle = '#000000';
-  context.fillRect(0, 0, 1024, 1024);
+  context.fillRect(0, 0, dim, dim);
   
+  line_color = 0xfffad7;
+
   let hashdata    = process_hash(txn);
   let formdata    = process_formdata(hashdata);
 
@@ -263,8 +264,9 @@ function init(txn)
 
   render(renderdata);
 
-  let metadata    = generate_metadata(formdata);
-  return metadata;
+  let ab_metadata = generate_artblocks_metadata(formdata);
+
+  return ab_metadata;
 }
 
 function render(rd)
@@ -342,8 +344,8 @@ function render(rd)
       let ken = get_noise(norm_turb * sample_x, norm_turb * sample_y, (i * rd.chaos));
 
       let current_aperture = ring_rad + ken * current_force;
-      let x = (buffer_size/2) + current_aperture * ct;
-      let y = (buffer_size/2) + current_aperture * st;
+      let x = (canvas.width/2) + current_aperture * ct;
+      let y = (canvas.width/2) + current_aperture * st;
 
       context.lineTo(x, y);
 
@@ -351,7 +353,7 @@ function render(rd)
       Individial lines. Not a single stroke with vertices.
       Gives a grided, mesh like appearence as alpha builds.
     */
-
+    
     }
 
     context.strokeStyle = '#' + col.toString(16) + alpha.toString(16);
@@ -508,4 +510,4 @@ Noise.prototype = {
   }
 }
 
-init(tokenData.hash);
+let feature_array = init(tokenData.hash);
