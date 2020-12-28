@@ -1,12 +1,23 @@
-
-/*
-  'Singularity'
-  @TskukamotoHideki
-  2020
-*/
+let line_weight = 2;
+let increment = 0.001;
+let radial_steps = 512;
+let mass_lower = 600.0;
+let mass_upper = 1200.0;
+let aper_lower = 100.0;
+let aper_upper = 400.0;
+let forc_lower = 550.0;
+let forc_upper = 2250.0;
+let turb_lower = 0.001;
+let turb_upper = 1.000;
+let chao_lower = 0.001;
+let chao_upper = 0.002;
+let deta_lower = 4.0;
+let deta_upper = 10.0;
 
 let data = [];
-let buffer_size = 1024;
+
+let buffer_size = 2400;
+
 let line_color = 0;
 
 let canvas; 
@@ -95,11 +106,6 @@ function evaluate(n, metadata)
   return metadata ? meta : points;
 }
 
-/* 
-  Returns ArtBlocks Style Metadata
-  ["Mass: 14.9% [LOW]", "Force: 55.7% [AVERAGE]", ...
-*/
-
 function generate_artblocks_metadata(formdata) 
 {
   let meta_mass = evaluate(formdata.mass, true);
@@ -163,6 +169,7 @@ function process_formdata(hashdata)
   let idx_turbulence = 5;
   let idx_chaos = 6;
   let idx_saturation = 7;
+  let idx_detail = 8;
 
   let formdata = 
   {
@@ -172,7 +179,8 @@ function process_formdata(hashdata)
     'symmetry':     hashdata[idx_symmetry],
     'turbulence':   hashdata[idx_turbulence],
     'chaos':        hashdata[idx_chaos],
-    'saturation':   hashdata[idx_saturation]
+    'saturation':   hashdata[idx_saturation],
+    'detail':       hashdata[idx_detail]
   };
 
   return formdata;
@@ -210,15 +218,16 @@ function generate_renderdata(fd)
 
   let renderdata = 
   {
-    'mass':         lerp(128.0,  900.0,  fd.mass),
-    'aperture':     lerp(24.00,  196.0,  fd.aperture),
-    'force':        lerp(256.0,  700.0,  fd.force),
+    'mass':         lerp(mass_lower,  mass_upper,  fd.mass),
+    'aperture':     lerp(aper_lower,  aper_upper,  fd.aperture),
+    'force':        lerp(forc_lower,  forc_upper,  fd.force),
     'symmetry':     1.0-fd.symmetry,
-    'turbulence':   lerp(0.000,  1.600,  fd.turbulence),
-    'chaos':        lerp(0.001,  0.01,   fd.chaos), 
+    'turbulence':   lerp(turb_lower,  turb_upper,  fd.turbulence),
+    'chaos':        lerp(chao_lower,  chao_upper,  fd.chaos), 
     'saturation':   fd.saturation,
     'form_points':  points.form,
-    'rare_points':  points.rare
+    'rare_points':  points.rare,
+    'detail':       lerp(deta_lower, deta_upper, fd.detail)
   };
 
   return renderdata;
@@ -244,9 +253,7 @@ function process_hash(txn)
 
 function init(txn)
 { 
-  noise = new Noise().noiseDetail(10);
-  noise.noiseSeed(3);
-  
+
   let dim = Math.min(window.innerWidth, window.innerHeight)
  
   canvas      = document.querySelector("canvas");
@@ -267,10 +274,12 @@ function init(txn)
 
   osb_context.fillStyle = '#000000';
   osb_context.fillRect(0, 0, buffer_size, buffer_size);
+  osb_context.lineWidth = line_weight;
   
   line_color = 0xfffad7;
 
   let hashdata    = process_hash(txn);
+
   let formdata    = process_formdata(hashdata);
 
   let renderdata  = generate_renderdata(formdata);
@@ -284,13 +293,15 @@ function init(txn)
 
 function render(rd)
 {
+  noise = new Noise().noiseDetail(rd.detail);
+  noise.noiseSeed(4);
+
   for (let i = 0; i < rd.mass; i++) 
   {
-    let increment = (canvas.width / buffer_size) * 0.01;
     let norm_inc = sq(i / rd.mass);
     let ring_rad = rd.aperture + (i * increment);
     let current_force = rd.force * norm_inc;
-    let alpha = parseInt((255.0 - (norm_inc * 255.0)));
+    let alpha = parseInt((255.0 - ((norm_inc) * 255.0)));
     let norm_turb = rd.turbulence * norm_inc;
 
     let g, start, middle, end, sat;
@@ -308,14 +319,14 @@ function render(rd)
         end   = 0x20fbbc;
       break;       
       case 2:
-        start = 0xfffcc8;
-        mid   = 0xfacc22;
-        end   = 0xf83600;
-      break;
-      default:
         start = 0x73d055;
         mid   = 0x1f968B;
         end   = 0x440154;
+      break;
+      default:
+        start = 0xfffcc8;
+        mid   = 0xfacc22;
+        end   = 0xf83600;
       break;
     }
 
@@ -342,7 +353,6 @@ function render(rd)
     }
 
     let col = lerp_colour(line_color, g, sat);
-    let radial_steps = 500;
 
     let ang = (Math.PI * 2.0) / radial_steps;
 
@@ -356,7 +366,6 @@ function render(rd)
       let sample_x = ct + rd.symmetry;
       let sample_y = st + rd.symmetry;
       let ken = get_noise(norm_turb * sample_x, norm_turb * sample_y, (i * rd.chaos));
-
       let current_aperture = ring_rad + ken * current_force;
       let x = (osb.width/2) + current_aperture * ct;
       let y = (osb.width/2) + current_aperture * st;
@@ -366,6 +375,7 @@ function render(rd)
 
     osb_context.strokeStyle = '#' + col.toString(16) + alpha.toString(16);
     osb_context.stroke();
+
   }
 
     can_context.drawImage(osb, 0, 0, osb.width, osb.height, 0, 0, canvas.width, canvas.height);
