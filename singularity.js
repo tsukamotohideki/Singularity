@@ -378,7 +378,9 @@ function render(rd)
 
   }
 
-    can_context.drawImage(osb, 0, 0, osb.width, osb.height, 0, 0, canvas.width, canvas.height);
+    let fbs = Math.min(osb.width, canvas.width);
+
+    can_context.drawImage(osb, 0, 0, osb.width, osb.height, 0, 0, fbs, fbs);
 }
 
 function get_noise(x, y, z)
