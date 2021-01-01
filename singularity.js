@@ -324,9 +324,9 @@ function render(rd)
         end   = 0x440154;
       break;
       default:
-        start = 0xfffcc8;
-        mid   = 0xfacc22;
-        end   = 0xf83600;
+        start = 0x12d6df;
+        mid   = 0xb9ffad;
+        end   = 0xf70fff;
       break;
     }
 
