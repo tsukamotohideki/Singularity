@@ -12,12 +12,16 @@ These awarded for the properties above being at the extremes. So, the system awa
 
 *Rarity Points define the colour gradient used by the form.*
 
+Rarity Level 1 [0 Points]
 ![Rarity Level 1 . 0 Points](http://distancefields.com/singularity/gradients/gradient_a.png)
 
+Rarity Level 2 [1 Point]
 ![Rarity Level 2 . 1 Point](http://distancefields.com/singularity/gradients/gradient_b.png)
 
+Rarity Level 3 [2 Points]
 ![Rarity Level 3 . 2 Points](http://distancefields.com/singularity/gradients/gradient_c.png)
 
+Rarity Level 4 [Greater than 2 points]
 ![Rarity Level 4 . Greater than 2 points](http://distancefields.com/singularity/gradients/gradient_d.png)
 
 
