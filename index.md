@@ -1,37 +1,34 @@
-## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/tsukamotohideki/Singularity/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+**Rarity in Singularity**
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+A few words on rarity and how it works within the *Singularity* collection.  In Singularity project, the 'forms' are driven by a number of properties. The properties we're interested here are:
 
-### Markdown
+*Mass*, *Force*, *Chaos*, *Symmetry* and *Turbulence*
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+These values were populated by the hashes, unique to each token, making each one visually different.  The system that generates the forms works on a points based system. There are two types of points:
 
-```markdown
-Syntax highlighted code block
+**Rarity Points** 
+These awarded for the properties above being at the extremes. So, the system awards 2 Rarity Points for the values being at either exactly 1.0 or 0.0 (a 1 in 128 chance). It also adds a single Rarity Point for the values being within 0.01 of the min or max value (a 1 in 50 chance).
 
-# Header 1
-## Header 2
-### Header 3
+*Rarity Points define the colour gradient used by the form.*
 
-- Bulleted
-- List
+![Rarity Level 1 . 0 Points](http://distancefields.com/singularity/gradients/gradient_a.png)
 
-1. Numbered
-2. List
+![Rarity Level 2 . 1 Point](http://distancefields.com/singularity/gradients/gradient_b.png)
 
-**Bold** and _Italic_ and `Code` text
+![Rarity Level 3 . 2 Points](http://distancefields.com/singularity/gradients/gradient_c.png)
 
-[Link](url) and ![Image](src)
-```
+![Rarity Level 4 . Greater than 2 points](http://distancefields.com/singularity/gradients/gradient_d.png)
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
 
-### Jekyll Themes
+**Form Points** 
+Form Points are also awarded for properties being within ranges, and are used to define 'features' within the form. They are:
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/tsukamotohideki/Singularity/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+*void*, *minimal*, *marginal*, *low*, *average*, *high*, *super*, *extreme* and *absolute*
 
-### Support or Contact
+*Form Points determine how saturated the colour of a form is.*
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+**Probability** 
+There is also logic within the code to establish the chance of any given Singularity being generated.   This is derived from the probability of that form's combination of 'features' occurring , and is expressed as a fraction with a numerator of 1. *(e.g 1 in x)* 
+
+The probability and form property ranges are all readable from the metadata.
