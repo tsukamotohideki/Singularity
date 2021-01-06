@@ -18,6 +18,8 @@ let data = [];
 
 let buffer_size = 2400;
 
+let res_multi = 0.0;
+
 let line_color = 0;
 
 let canvas; 
@@ -256,25 +258,20 @@ function init(txn)
 
   let dim = Math.min(window.innerWidth, window.innerHeight)
  
-  canvas      = document.querySelector("canvas");
-  osb         = document.createElement('canvas');
+  res_multi = dim / buffer_size;
 
-  osb_context = osb.getContext("2d");
+  canvas      = document.querySelector("canvas");
   can_context = canvas.getContext("2d");
 
-  osb_context.imageSmoothingEnabled = true;
   can_context.imageSmoothingEnabled = true;  
-  osb_context.imageSmoothingQuality = "high";
   can_context.imageSmoothingQuality = "high";
 
   canvas.width  = dim;
   canvas.height = dim;
-  osb.width     = buffer_size;
-  osb.height    = buffer_size;
 
-  osb_context.fillStyle = '#000000';
-  osb_context.fillRect(0, 0, buffer_size, buffer_size);
-  osb_context.lineWidth = line_weight;
+  can_context.fillStyle = '#000000';
+  can_context.fillRect(0, 0, dim, dim);
+  can_context.lineWidth = line_weight * res_multi;
   
   line_color = 0xfffad7;
 
@@ -356,7 +353,7 @@ function render(rd)
 
     let ang = (Math.PI * 2.0) / radial_steps;
 
-    osb_context.beginPath();
+    can_context.beginPath();
 
     for (let j = 0; j <= radial_steps; j++) 
     {
@@ -367,20 +364,16 @@ function render(rd)
       let sample_y = st + rd.symmetry;
       let ken = get_noise(norm_turb * sample_x, norm_turb * sample_y, (i * rd.chaos));
       let current_aperture = ring_rad + ken * current_force;
-      let x = (osb.width/2) + current_aperture * ct;
-      let y = (osb.width/2) + current_aperture * st;
+      let x = (canvas.width/2) + ((current_aperture * ct) * res_multi);
+      let y = (canvas.height/2) + ((current_aperture * st) * res_multi);
 
-      osb_context.lineTo(x, y);
+      can_context.lineTo(x, y);
     }
 
-    osb_context.strokeStyle = '#' + col.toString(16) + alpha.toString(16);
-    osb_context.stroke();
+    can_context.strokeStyle = '#' + col.toString(16) + alpha.toString(16);
+    can_context.stroke();
 
   }
-
-    let fbs = Math.min(osb.width, canvas.width);
-
-    can_context.drawImage(osb, 0, 0, osb.width, osb.height, 0, 0, fbs, fbs);
 }
 
 function get_noise(x, y, z)
